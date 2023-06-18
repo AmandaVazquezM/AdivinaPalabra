@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0%;
+            padding: 0%;
+        }
+        .celdas{
+            background-color: #f9f5f5;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 0;
+            border-radius: 0.5rem;
+        }
+        body{
+            background-image:-moz-radial-gradient(rgb(233, 148, 52), rgb(223, 174, 161));
+            display: flex;
+            flex-direction: column ;
+            align-items: center;
+            justify-content: center;
+        }
+        #juego{
+            margin-top: 5%;
+            display: flex;
+            flex-direction: column ;
+            align-items: center;
+            gap:1em;
+            background-color: rgb(232, 196, 103);
+            width: 40vw;
+            height: 40vw;
+            box-shadow: 10px 40px 20px black;
+        }
+        main{
+            display: flex;
+            flex-direction: column ;
+            align-items: center; 
+            justify-content: center;
+        }
+        table{
+            margin-top: 10%;
+            width: 20vw;
+            height: 25vw;
+        }
+        #teclado{
+            width:590px;
+            background-color: #aaa;
+
+        }
+        .teclado {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        .teclado button {
+            font-size: 20px;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .teclado button.borrar::before {
+            content:url("./backspace_FILL0_wght400_GRAD0_opsz48.png");
+        }
+        .teclado button.borrar{
+            padding: 0;
+            color: #fff;
+            background-color: red;
+            width: 5vw;
+            overflow: hidden;
+            height: 5vh;
+        }
+        .teclado button.enter {
+            grid-column: 4 / span 2;
+            background-color: rgb(0, 255, 119);
+    }
+
+    </style>
+</head>
+<body>
+    <div id="juego">
+        <main id="main"></main>
+        <div id="teclado">
+            <div id="letras"></div>
+        </div>
+    </div>
+    <script>
+        let main=document.getElementById("main");
+        let intentos=6;
+        let palabras=["marco", "barco", "narco", "jugar", "patos", "gatos", "salsa", "carro", "zafar", "acido", "focas", "comer", "beber", "catar", "brazo", "calzo", "jerez"];
+        let letras = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Ñ", "enter", "Z", "X", "C", "V", "B", "N", "M", " "];
+        let palabraSeleccionada = palabras[Math.floor(Math.random() * palabras.length)];
+
+        //generar la tabla
+        let tabla=document.createElement("table");
+        for(let i=0; i<6; i++){
+            let fila=document.createElement("tr");
+            for(let j=0; j<5; j++){
+                let columna=document.createElement("td");
+                columna.innerHTML="";
+                fila.appendChild(columna);}
+                tabla.appendChild(fila);
+        }
+        main.appendChild(tabla); 
+
+        //darle estilo a la tabla
+        let celdas=document.querySelectorAll("td");
+        for(let i=0; i<celdas.length; i++){
+            celdas[i].className+="celdas";
+        }
+
+        // Crea un elemento teclado
+        let teclado = document.createElement("div");
+        teclado.className = "teclado"; // añade una clase para los estilos CSS
+
+        // Crea un botón para cada letra y añádelo al teclado
+        for (var i = 0; i < letras.length; i++) {
+            var boton = document.createElement("button");
+            boton.innerHTML = letras[i];
+            // Añade una clase para identificar la tecla de borrar
+            if (letras[i] === " ") {
+                boton.className = "borrar";
+            }
+            // Añade una clase para identificar la tecla Enter
+            if (letras[i] === "enter") {
+                boton.className = "enter";
+            }
+            teclado.appendChild(boton);
+
+            if(boton.className=="borrar"){
+                boton.addEventListener("click",eliminar);
+            }else if(boton.className=="enter"){
+                boton.addEventListener("click",introducir);        
+            }else{
+                // Agrega el evento click a cada botón del teclado
+                boton.addEventListener("click", function() {
+                    var letra = this.innerHTML;
+                    // Encuentra la celda activa en la tabla y agrega la letra
+                    var celdaActiva = document.querySelector(".activo");
+                    if (celdaActiva !== null) {
+                        celdaActiva.innerHTML = letra;
+                        // Desactiva la celda anterior y activa la siguiente
+                        celdaActiva.classList.remove("activo");
+                        var siguienteCelda = celdaActiva.nextElementSibling;
+                        if (siguienteCelda !== null) {
+                            siguienteCelda.classList.add("activo");
+                        }
+                    }
+                });
+            }
+
+        }
+
+        // Añade el teclado al cuerpo del documento HTML
+        main.appendChild(teclado);
+
+    // Agrega la clase "activo" a la primera celda de la tabla
+    tabla.rows[0].cells[0].classList.add("activo");
+    tabla.rows[0].classList.add("activa");
+
+    function eliminar(){
+        let fila=document.querySelector("tr.activa");
+        let activo=fila.querySelector(".activo");
+        if(activo!=null){
+            activo.previousSibling.innerHTML="";
+            activo.previousSibling.classList.add("activo");
+            activo.classList.remove("activo");
+        }else if(activo==null){
+            let ultimaCelda=fila.querySelectorAll(".celdas")[4];
+            ultimaCelda.innerHTML="";
+            ultimaCelda.classList.add("activo");
+        }
+    }
+
+    function introducir(){
+        let fila=document.querySelector("tr.activa");
+        let celdas=fila.querySelectorAll(".celdas");
+        let palabraUsuario="";
+        celdas.forEach((celda)=>{
+            palabraUsuario=palabraUsuario+(celda.innerHTML).toLowerCase();
+        });
+        
+        if(!palabras.includes(palabraUsuario)){
+            alert("La palabra no esta entre las posibles.")
+        }else if(palabraUsuario!=palabraSeleccionada){
+            fila.classList.remove("activa");
+            fila.nextSibling.classList.add("activa");
+            fila.nextSibling.querySelector(".celdas").classList.add("activo");
+
+
+            let arrayUsuario=palabraUsuario.split("");
+            let arraySeleccionada=palabraSeleccionada.split("");
+            arrayUsuario.forEach((letra,indice)=>{
+                if(letra==arraySeleccionada[indice]){
+                    celdas[indice].style.backgroundColor="green";
+                    arraySeleccionada[indice]="";
+                }else if(arraySeleccionada.includes(letra)){
+                    celdas[indice].style.backgroundColor="orange";
+                    arraySeleccionada[arraySeleccionada.indexOf(letra)]="";
+                }else{
+                    celdas[indice].style.backgroundColor="gray";
+                }
+            })
+        }else if(palabraUsuario==palabraSeleccionada){
+            fila.classList.remove("activa");
+
+            celdas.forEach(celda=>{
+                celda.style.backgroundColor="green";
+            });
+
+            alert("Has acertado!");
+        }
+    }
+    </script>
+
+</body>
+</html>
